@@ -27,8 +27,6 @@ line = plot(log2((1:length(m))),20*log10(m))
 
 slopeMatrix = (20*log10(m(2:length(m))))./log2(2:length(m));                      #slope in Db/octave
 slope = sum(slopeMatrix(2:length(slopeMatrix))/(length(slopeMatrix)-1));
-%%slope = sum(slopeMatrix(50:128)/(128-50));
-20*log10(m(50))
 
 -11.82548879493844     #avg slope over all points
 -11.06519211255925     #avg slope 2:14
@@ -48,8 +46,10 @@ ndegree = 60;
 p = polyfit(1:150,m(1:150),ndegree)
 
 pdomain = 1:0.1:60;
-plot(pdomain,1./polyval(p,pdomain))
+#plot(pdomain,1./polyval(p,pdomain))
+flat = @(f) polyval(p,f).*f<50 + f.*f>=50
 
+plot(pdomain, flat(pdomain))
 #This is where to loop program on UI update! Before this line is loading screen
 
 Fs=44100;           #sampling rate
