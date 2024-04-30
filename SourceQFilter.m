@@ -2,7 +2,6 @@ clear all;
 clc;
 close;
 
-#new username test change for github
 #graphics_toolkit("gnuplot")
 #plot([0 1 2],[0 1 2])
 #close;
@@ -10,8 +9,8 @@ close;
 #set( 0, "defaultlinelinewidth",3)
 #plot([0 1 2],[2 1 0])
 
-Tp=0.4
-Tn=0.16
+Tp = 0.4
+Tn = 0.16
 glottPulse = @(x) (0).*((x<0)) + (3.*(x./Tp).^2 - 2.*(x./Tp).^3).*((0<=x) & (x<Tp)) + (1-((x-Tp)./Tn).^2).*((Tp<=x) & (x<Tp+Tn)) + (0).*((Tp+Tn<=x));
 glott = @(x) (glottPulse(mod(x,1)) - 0.3066675142915666);
 
@@ -28,16 +27,28 @@ line = plot(log2((1:length(m))),20*log10(m))
 
 slopeMatrix = (20*log10(m(2:length(m))))./log2(2:length(m));                      #slope in Db/octave
 slope = sum(slopeMatrix(2:length(slopeMatrix))/(length(slopeMatrix)-1));
+%%slope = sum(slopeMatrix(50:128)/(128-50));
+20*log10(m(50))
+
 -11.82548879493844     #avg slope over all points
 -11.06519211255925     #avg slope 2:14
+-11.79216929325847     #avg slope 16:256
+-11.74645443336495     #avg slope 16:128
+-11.61373259517425     #perfect slope at (50,m(50))
+
+hold on
+plot(log2(0:440),(20*log10(m(50))/log2(50))*log2(0:440))
+hold off
 
 clf
 curve = plot(1:length(m),m)
 axis([0 10])
 hold on
-ndegree = 24;
+ndegree = 60;
 p = polyfit(1:150,m(1:150),ndegree)
-plot(1:150,polyval(p,1:150))
+
+pdomain = 1:0.1:60;
+plot(pdomain,1./polyval(p,pdomain))
 
 #This is where to loop program on UI update! Before this line is loading screen
 
@@ -113,4 +124,4 @@ plot(fh,20*log10(transform))
 hold on
 #plot(fh,log10(2^-0.5))
 
-
+#spec = Yh*
