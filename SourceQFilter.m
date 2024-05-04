@@ -34,7 +34,6 @@ slope = sum(slopeMatrix(2:length(slopeMatrix))/(length(slopeMatrix)-1));
 -11.74645443336495     #avg slope 16:128
 -11.61373259517425     #perfect slope at (50,m(50))
 
-%%todo: make polyval(p,1) = 1
 hold on
 plot(log2(0:440),(20*log10(m(50))/log2(50))*log2(0:440))
 hold off
@@ -46,14 +45,17 @@ hold on
 
 #tweak ndegree and polymaxrange
 ndegree = 30;
-polyrangemax = 80;
-p = polyfit(1:polyrangemax,m(1:polyrangemax),ndegree);
+prangemax = 150;
+p = polyfit(1:prangemax,m(1:prangemax),ndegree);
+pp = splinefit(1:prangemax,m(1:prangemax),prangemax);
 
-pdomain = 1:1:80;
-plot(pdomain,1./polyval(p,pdomain),"color",[0.5 0 1])
+pdomain = 1:0.1:150;
+plot(pdomain,1./polyval(p,pdomain),"color",[0.8 0 1])        #plot polynomial p
 hold on
-plot(pdomain,1./m(pdomain),"color",[0.8 0 0])
-axis([0 20 0 1./polyval(p,20)])
+plot(pdomain,1./ppval(pp,pdomain),"color",[0 0.8 0.4])
+plot(round(pdomain),1./m(round(pdomain)),"color",[0.8 0 0],"o")  #plot discrete max matrix m values
+#axis([0 max(pdomain) 0 max(1./polyval(p,pdomain))])
+axis([0 20])
 hold off
 #tweak ndegree and polymaxrange
 
