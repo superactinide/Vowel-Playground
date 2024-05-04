@@ -34,6 +34,7 @@ slope = sum(slopeMatrix(2:length(slopeMatrix))/(length(slopeMatrix)-1));
 -11.74645443336495     #avg slope 16:128
 -11.61373259517425     #perfect slope at (50,m(50))
 
+%%todo: make polyval(p,1) = 1
 hold on
 plot(log2(0:440),(20*log10(m(50))/log2(50))*log2(0:440))
 hold off
@@ -42,15 +43,28 @@ clf
 curve = plot(1:length(m),m)
 axis([0 10])
 hold on
-ndegree = 60;
-p = polyfit(1:150,m(1:150),ndegree)
 
-pdomain = 1:0.1:60;
-#plot(pdomain,1./polyval(p,pdomain))
-flat = @(f) polyval(p,f).*f<50 + f.*f>=50
+#tweak ndegree and polymaxrange
+ndegree = 30;
+polyrangemax = 80;
+p = polyfit(1:polyrangemax,m(1:polyrangemax),ndegree);
+
+pdomain = 1:1:80;
+plot(pdomain,1./polyval(p,pdomain),"color",[0.5 0 1])
+hold on
+plot(pdomain,1./m(pdomain),"color",[0.8 0 0])
+axis([0 20 0 1./polyval(p,20)])
+hold off
+#tweak ndegree and polymaxrange
+
+flat = @(f) polyval(p,f).*(f<50) + 10.^(-11.61373259517425*log2(f)./20).*(f>=50)
+#the flat() function gives the relative amplitude
 
 plot(pdomain, flat(pdomain))
+
+
 #This is where to loop program on UI update! Before this line is loading screen
+
 
 Fs=44100;           #sampling rate
 T=1/Fs;             #period
