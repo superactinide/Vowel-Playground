@@ -43,23 +43,18 @@ curve = plot(1:length(m),m)
 axis([0 10])
 hold on
 
-#tweak ndegree and polymaxrange
-ndegree = 30;
 prangemax = 150;
-p = polyfit(1:prangemax,m(1:prangemax),ndegree);
-pp = splinefit(1:prangemax,m(1:prangemax),prangemax);
+pp = splinefit(0:prangemax,[2-m(2), m(1:prangemax)],prangemax); #convert m to spline, adding extra point at 0
 
 pdomain = 1:0.1:150;
-plot(pdomain,1./polyval(p,pdomain),"color",[0.8 0 1])        #plot polynomial p
+plot(pdomain,ppval(pp,pdomain),"color",[0 0.8 0.4])           #plot spline pp
 hold on
-plot(pdomain,1./ppval(pp,pdomain),"color",[0 0.8 0.4])
-plot(round(pdomain),1./m(round(pdomain)),"color",[0.8 0 0],"o")  #plot discrete max matrix m values
-#axis([0 max(pdomain) 0 max(1./polyval(p,pdomain))])
-axis([0 20])
+plot(round(pdomain),m(round(pdomain)),"color",[0.8 0 0],"o")  #plot discrete max matrix m values
+axis([0 20 0 1.2])
+plot([1:100*max(pdomain)]./100,abs(Yflat100([1:100*max(pdomain)])))              #plot Yflat100
 hold off
-#tweak ndegree and polymaxrange
 
-flat = @(f) polyval(p,f).*(f<50) + 10.^(-11.61373259517425*log2(f)./20).*(f>=50)
+flat = @(f) 1.*(f<1) + ppval(pp,f).*((f>=1) & (f<50)) + 10.^(-11.61373259517425*log2(f)./20).*(f>=50)
 #the flat() function gives the relative amplitude
 
 plot(pdomain, flat(pdomain))
@@ -111,23 +106,24 @@ function transferFunct = formants(fh,F1,Q1,Db1)
   transferFunct =  10^(Db1/20) * (1+(fh./F1 - F1./fh).^2 * Q1^2).^-0.5;
 endfunction
 
-Y=fft(X);
-Yh=Y(1:L/2);               #removes reflection of fft
+Y=fft(X);                  #assigns Y to the fourier transform of X
+Yh=Y(1:L/2);               #removes reflection of fft over nyquist
 f=Fs/L*(1:length(Y));      #frequency domain for fft
 fh=Fs/L*(1:length(Yh));    #frequencies up to nyquist frequency
 
-plot(fh,abs(Yh))
+#{
+plot(fh,abs(Yh))                            #fft up to nyquist frequency
 hold on
 plot(fh,max(abs(Yh))*((10.^(-11.06519211255925/20)).^log2(fh./f0)))
-hold on
-plot(f0*(1:length(m)),max(abs(Yh))*m)
+#plot of -11.06 dB/oct rolloff
+plot(f0*(1:length(m)),max(abs(Yh))*m)       #plot of m values relative to fft
+plot(fh,max(abs(Yh)).*flat(fh./f0))         #plot of flat() relative to fft
+hold off
 axis([0 2000 0 max(abs(Yh))])
 xlabel("Frequecy (Hz)")
 ylabel("Amplitude")
-title("Spectrogram of Glott and 11.8 dB Rolloff")
-
-#splitlength =
-#raise Y peaks to same level
+title("Spectrogram of Glott, flat(), and 11.07 dB Rolloff")
+#}
 
 transform = formants(fh,500,10,0);      #linear plot of transform
 plot(fh,transform)
