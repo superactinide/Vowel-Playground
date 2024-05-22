@@ -93,7 +93,7 @@ for n = 1:L
 endfor
 Xsum=Xsum/L;
 
-waveform = plot(t,X,"linewidth",3);
+waveform = plot(t,X,"linewidth",1);
 axis([0 2/f0 -1 1])
 xlabel("Time (s)")
 ylabel("Amplitude")
@@ -125,7 +125,7 @@ ylabel("Amplitude")
 title("Spectrogram of Glott, flat(), and 11.07 dB Rolloff")
 #}
 
-transform = formants(fh,500,10,0);      #linear plot of transform
+transform = formants(fh,250,10,0)+formants(fh,2250,30,-6)+formants(fh,3500,20,-9)+formants(fh,4500,20,-12);      #linear plot of transform
 plot(fh,transform)
 axis([0 N*f0+f0])
 xlabel("Frequency (Hz)")
@@ -133,7 +133,25 @@ ylabel("Amplitude")
 title("Linear Plot of Transform")
 
 plot(fh,20*log10(transform))
-hold on
+axis([0 N*f0+f0])
+#hold on
 #plot(fh,log10(2^-0.5))
 
-#spec = Yh*
+spec = Yh.*transform;
+specpadded = horzcat(spec,zeros(1,length(Y)-length(spec)));      #lengthens spectrum to have only zeros past nyquist frequency
+
+plot(fh,abs(spec)*1/max(abs(spec)))
+axis([0 5000])
+hold on
+plot(fh, transform)                     #lin plot of transform
+plot(fh, 20*log10(transform))           #log plot of transform
+
+Z = ifft(specpadded);
+Z = Z*(1/max(Z));
+plot(t,Z)
+axis([0 2/f0])
+#plot(f,abs(fft(Z)));
+#axis([0 7500])
+
+playZ = audioplayer(Z,Fs);
+play(playZ)
